@@ -30,12 +30,17 @@
 
     <p id="placename">Washington</p>
 
+    <h5 id="totalvotes"> Total Votes (2020): </h5>
+    <p class="county-count" id="placename-total-votes">4087631</p>
+    <div id="county-chart-proportional"></div>
     <div id="count" class="card">
-      <h5 id="desc"> 2020 Presidential Votes: Democratic Nominee</h5>
-      <p id="county-count">341</p>
+      <h5 class="desc"> 2020 Presidential Votes: Democratic Nominee</h5>
+      <p class="county-count" id="demvote2020">2369612</p>
+      <h5 class="desc"> 2020 Presidential Votes: Republican Nominee</h5>
+      <p class="county-count" id="repvote2020">2369612</p>
     </div>
 
-    <div id="county-chart"></div>
+
 
     <div id="footer">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
@@ -73,18 +78,110 @@
     // 4. Declare three global variables for the wa counties thematic layer, bar chart, and the organized wa data.
     var countiesLayer = null,
       bchart = null,
+      pchart = null,
       counties = {};
 
     // 5. load all datasets through promise mechnism and store them in an array
-    Promise.all([d3.json("assets/presByCounty.geojson")]).then(function(datasets) {
+    Promise.all([d3.json("assets/presbycnty2.geojson")]).then(function(datasets) {
 
       // 6. Map relevant operations
 
       // 6.1 create a couties layer
       countiesLayer = L.geoJSON(datasets[0], {
-        // onEachFeature: onEachFeature
+        onEachFeature: onEachFeature
       }).addTo(mymap);
 
+      // 6.2 add three events to the the layer “countiesLayer”.
+      function onEachFeature(feature, layer) {
+        layer.on({
+          mouseover: highlightFeature,
+          click: clickFeature,
+          mouseout: resetHighlight
+        });
+      }
+
+      // 6.3 this function works when the mouse hovers over on a map feature.
+      function highlightFeature(e) {
+        // e indicates the current event
+        var feature = e.target; //the target capture the object which the event associates with
+        feature.setStyle({
+          weight: 2,
+          opacity: 0.8,
+          color: '#e3e3e3',
+          fillColor: '#000000',
+          fillOpacity: 0.1
+        });
+      }
+
+      // 6.4 this function executes when the mouse clicks on a map feature.
+      function clickFeature(e) {
+
+        L.DomEvent.stopPropagation(e);
+        var ttlv = e.target.feature.properties.prz2020dem + e.target.feature.properties.prz2020rep;
+        $("#placename").text(e.target.feature.properties.COUNTY_LAB + " County");
+        $("#demvote2020").text(e.target.feature.properties.prz2020dem);
+        $("#repvote2020").text(e.target.feature.properties.prz2020rep);
+        $("placename-total-votes").text(ttlv);
+        var pchart = c3.generate({
+        data: {
+            // iris data from R
+            columns: [
+                ['Democratic Votes', e.target.feature.properties.prz2020dem],
+                ['Republican Votes', e.target.feature.properties.prz2020rep],
+            ],
+            type : 'pie',
+            onclick: function (d, i) { console.log("onclick", d, i); },
+            onmouseover: function (d, i) { console.log("onmouseover", d, i); },
+            onmouseout: function (d, i) { console.log("onmouseout", d, i); }
+        },
+        bindto: "#county-chart-proportional"
+        });
+      }
+
+      // 6.5 reset the hightlighted feature when the mouse is out of its region.
+      function resetHighlight(e) {
+        countiesLayer.resetStyle(e.target);
+      }
+
+      // 6.6 bind the onMapClick function to the mymap object.
+      mymap.on('click', onMapClick);
+      // when click on any place on the map expect the counties layer, the text on the sidebar will be reset to the total number of WA.
+      function onMapClick(e) {
+        $("#placename").text("Washington");
+        $("#demvote2020").text("2369612");
+        $("repvote2020").text("1584651");
+        var pchart = c3.generate({
+        data: {
+            // iris data from R
+            columns: [
+                ['Democratic Votes', 2369612],
+                ['Republican Votes', 1584651],
+            ],
+            type : 'pie',
+            onclick: function (d, i) { console.log("onclick", d, i); },
+            onmouseover: function (d, i) { console.log("onmouseover", d, i); },
+            onmouseout: function (d, i) { console.log("onmouseout", d, i); }
+        },
+        bindto: "#county-chart-proportional"
+        });
+      }
+
+
+    });
+
+    var pchart = c3.generate({
+    data: {
+        // iris data from R
+        columns: [
+            ['Democratic Votes', 2369612],
+            ['Republican Votes', 1584651],
+        ],
+        type : 'pie',
+        onclick: function (d, i) { console.log("onclick", d, i); },
+        onmouseover: function (d, i) { console.log("onmouseover", d, i); },
+        onmouseout: function (d, i) { console.log("onmouseout", d, i); }
+    },
+    bindto: "#county-chart-proportional"
     });
     </script>
 </body>

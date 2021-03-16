@@ -65,20 +65,30 @@ html, body, #map {
   font-size: 40px;
   font-family: 'Oswald', sans-serif;
 }
-
+#totalvotes {
+  font-size: 30px;
+  font-family: 'Oswald', sans-serif;
+}
 /* card decks */
-#desc {
-  text-align: center;
+.desc {
+  text-align: left;
   color: lightgray;
-  font-size: medium;
+  font-size: 25px;
   font-weight: bold;
 }
 
-#county-count {
+.county-count {
   margin:0;
-  text-align: center;
-  color: orange;
+  text-align: left;
+
   font-size: 50px;
+}
+
+#demvote2020 {
+  color: #4B92E7;
+}
+#repvote2020 {
+  color: #F35535;
 }
 
 #county-chart {
