@@ -29,10 +29,13 @@
     </div>
 
     <p id="placename">Washington</p>
-
+    <!--
     <h5 id="totalvotes"> Total Votes (2020): </h5>
-    <p class="county-count" id="placename-total-votes">4087631</p>
+    <p class="county-count" id="total-votes">4087631</p>
+    -->
+    <h5 class="desc"> 2020 Presidential Vote Breakdown </h5>
     <div id="county-chart-proportional"></div>
+    <div id="county-chart-history"></div>
     <div id="count" class="card">
       <h5 class="desc"> 2020 Presidential Votes: Democratic Nominee</h5>
       <p class="county-count" id="demvote2020">2369612</p>
@@ -117,17 +120,21 @@
       function clickFeature(e) {
 
         L.DomEvent.stopPropagation(e);
-        var ttlv = e.target.feature.properties.prz2020dem + e.target.feature.properties.prz2020rep;
+
         $("#placename").text(e.target.feature.properties.COUNTY_LAB + " County");
         $("#demvote2020").text(e.target.feature.properties.prz2020dem);
         $("#repvote2020").text(e.target.feature.properties.prz2020rep);
-        $("placename-total-votes").text(ttlv);
-        var pchart = c3.generate({
+        pchart = c3.generate({
         data: {
             // iris data from R
             columns: [
                 ['Democratic Votes', e.target.feature.properties.prz2020dem],
                 ['Republican Votes', e.target.feature.properties.prz2020rep],
+                ['Libertarian Votes',e.target.feature.properties.prz2020lib],
+                ['Green Votes', e.target.feature.properties.prz2020grn],
+                ['Socialism and Liberation Votes', e.target.feature.properties.prz2020slp],
+                ['Socialist Worker Votes', e.target.feature.properties.prz2020swp],
+                ['Write-In Votes', e.target.feature.properties.prz2020wri]
             ],
             type : 'pie',
             onclick: function (d, i) { console.log("onclick", d, i); },
@@ -156,6 +163,11 @@
             columns: [
                 ['Democratic Votes', 2369612],
                 ['Republican Votes', 1584651],
+                ['Libertarian Votes',80500],
+                ['Green Votes', 18289],
+                ['Socialism and Liberation Votes', 4840],
+                ['Socialist Worker Votes', 2487],
+                ['Write-In Votes', 27252],
             ],
             type : 'pie',
             onclick: function (d, i) { console.log("onclick", d, i); },
@@ -169,12 +181,17 @@
 
     });
 
-    var pchart = c3.generate({
+    pchart = c3.generate({
     data: {
         // iris data from R
         columns: [
             ['Democratic Votes', 2369612],
             ['Republican Votes', 1584651],
+            ['Libertarian Votes',80500],
+            ['Green Votes', 18289],
+            ['Socialism and Liberation Votes', 4840],
+            ['Socialist Worker Votes', 2487],
+            ['Write-In Votes', 27252]
         ],
         type : 'pie',
         onclick: function (d, i) { console.log("onclick", d, i); },
@@ -182,6 +199,31 @@
         onmouseout: function (d, i) { console.log("onmouseout", d, i); }
     },
     bindto: "#county-chart-proportional"
+    });
+
+    bchart = c3.generate({
+      data: {
+        columns: [
+          ['Democratic Votes', 2369612,1742718,1755396,1750848],
+          ['Republican Votes', 1584651,1221747,1290670,1229216],
+          ['Libertarian Votes',80500,160879,42202,12728],
+          ['Green Votes', 18289,58417,20928,3819],
+          ['Socialism and Liberation Votes', 4840,3523,1318,705],
+          ['Socialist Worker Votes', 2487,4307,1205,641],
+          ['Constitution Votes', 0, 17623,8851,9432],
+          ['Justice Votes', 0, 0, 4946,0],
+          ['Independent Votes', 0, 0, 0, 29489]
+          ['Write-In Votes', 27252,0,0,0]
+        ],
+        type: 'bar',
+        groups: [
+          ['Green Votes', 'Socialism and Liberation Votes', 'Socialist Worker Votes', 'Constitution votes', 'Justice Votes', 'Independent Votes', 'Write-In Votes']
+        ]
+      },
+      axis: {
+        rotated: true
+      },
+      bindto: "#county-chart-history"
     });
     </script>
 </body>
