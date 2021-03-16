@@ -29,30 +29,32 @@
     </div>
 
     <p id="placename">Washington</p>
-    <!--
-    <h5 id="totalvotes"> Total Votes (2020): </h5>
-    <p class="county-count" id="total-votes">4087631</p>
-    -->
+    <div id="totalvotes">
+      <span> Total Votes (2020): </span><span id="total-votes">4087631</span>
+    </div>
+
     <h5 class="desc"> 2020 Presidential Vote Breakdown </h5>
     <div id="county-chart-proportional"></div>
+    <h5 class="desc"> Presidential Vote History </h5>
     <div id="county-chart-history"></div>
+<!--
     <div id="count" class="card">
       <h5 class="desc"> 2020 Presidential Votes: Democratic Nominee</h5>
       <p class="county-count" id="demvote2020">2369612</p>
       <h5 class="desc"> 2020 Presidential Votes: Republican Nominee</h5>
-      <p class="county-count" id="repvote2020">2369612</p>
+      <p class="county-count" id="repvote2020">1584651</p>
     </div>
+-->
 
 
-
-    <div id="footer">
+    <!-- <div id="footer">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
       irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet,
       consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
       in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
       eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
       dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-    </div>
+    </div> -->
   </div>
 
   <!-- mainwindow -->
@@ -124,6 +126,7 @@
         $("#placename").text(e.target.feature.properties.COUNTY_LAB + " County");
         $("#demvote2020").text(e.target.feature.properties.prz2020dem);
         $("#repvote2020").text(e.target.feature.properties.prz2020rep);
+        $("#total-votes").text(e.target.feature.properties.prz2020dem+e.target.feature.properties.prz2020rep+e.target.feature.properties.prz2020lib+e.target.feature.properties.prz2020grn+e.target.feature.properties.prz2020slp+e.target.feature.properties.prz2020swp+e.target.feature.properties.prz2020wri);
         pchart = c3.generate({
         data: {
             // iris data from R
@@ -143,6 +146,51 @@
         },
         bindto: "#county-chart-proportional"
         });
+
+        bchart = c3.generate({
+          data: {
+            columns: [
+              ['Democratic Votes', e.target.feature.properties.prz2020dem,e.target.feature.properties.prz2016dem,e.target.feature.properties.prz2012dem,e.target.feature.properties.prz2008dem],
+              ['Republican Votes', e.target.feature.properties.prz2020rep,e.target.feature.properties.prz2016rep,e.target.feature.properties.prz2012rep,e.target.feature.properties.prz2008rep],
+              ['Libertarian Votes', e.target.feature.properties.prz2020lib,e.target.feature.properties.prz2016lib,e.target.feature.properties.prz2012lib,e.target.feature.properties.prz2008lib],
+              ['Green Votes', e.target.feature.properties.prz2020grn,e.target.feature.properties.prz2016grn,e.target.feature.properties.prz2012grn,e.target.feature.properties.prz2008grn],
+              ['Socialism and Liberation Votes', e.target.feature.properties.prz2020slp,e.target.feature.properties.prz2016slp,e.target.feature.properties.prz2012slp,e.target.feature.properties.prz2008slp],
+              ['Socialist Worker Votes', e.target.feature.properties.prz2020swp,e.target.feature.properties.prz2016swp,e.target.feature.properties.prz2012swp,e.target.feature.properties.prz2008swp],
+              ['Constitution Votes', 0, e.target.feature.properties.prz2016con,e.target.feature.properties.prz2012con,e.target.feature.properties.prz2008con],
+              ['Justice Votes', 0, 0, e.target.feature.properties.prz2012jst,0],
+              ['Independent Votes', 0, 0, 0, e.target.feature.properties.prz2008ind],
+              ['Write-In Votes', e.target.feature.properties.prz2020wri,0,0,0],
+            ],
+            type: 'bar',
+            groups:[
+              ['Green Votes', 'Socialism and Liberation Votes', 'Socialist Worker Votes', 'Constitution Votes', 'Justice Votes', 'Independent Votes', 'Write-In Votes']
+            ],
+            labels: {
+                format: {
+                  'Democratic Votes': function(d) {return d},
+                  'Republican Votes': function(d) {return d},
+                  'Libertarian Votes': function(d) {return d}
+                }
+              },
+            order:null,
+          },
+          axis: {
+            x: {
+              type: 'category',
+              categories: ['2020', '2016', '2012', '2008']
+            },
+            y: {
+              tick: {
+                format: function(d) {return d/1000 + 'k'}
+              }
+            },
+            rotated: true
+          },
+          padding: {
+            right: 20
+          },
+          bindto: "#county-chart-history"
+        });
       }
 
       // 6.5 reset the hightlighted feature when the mouse is out of its region.
@@ -152,12 +200,15 @@
 
       // 6.6 bind the onMapClick function to the mymap object.
       mymap.on('click', onMapClick);
+
       // when click on any place on the map expect the counties layer, the text on the sidebar will be reset to the total number of WA.
       function onMapClick(e) {
         $("#placename").text("Washington");
         $("#demvote2020").text("2369612");
-        $("repvote2020").text("1584651");
-        var pchart = c3.generate({
+        $("#repvote2020").text("1584651");
+        $("#total-votes").text("4087631");
+
+        pchart = c3.generate({
         data: {
             // iris data from R
             columns: [
@@ -175,6 +226,52 @@
             onmouseout: function (d, i) { console.log("onmouseout", d, i); }
         },
         bindto: "#county-chart-proportional"
+        });
+
+        //Bar chart of voting history
+        bchart = c3.generate({
+          data: {
+            columns: [
+              ['Democratic Votes', 2369612,1742718,1755396,1750848],
+              ['Republican Votes', 1584651,1221747,1290670,1229216],
+              ['Libertarian Votes',80500,160879,42202,12728],
+              ['Green Votes', 18289,58417,20928,3819],
+              ['Socialism and Liberation Votes', 4840,3523,1318,705],
+              ['Socialist Worker Votes', 2487,4307,1205,641],
+              ['Constitution Votes', 0, 17623,8851,9432],
+              ['Justice Votes', 0, 0, 4946,0],
+              ['Independent Votes', 0, 0, 0, 29489],
+              ['Write-In Votes', 27252,0,0,0]
+            ],
+            type: 'bar',
+            groups: [
+              ['Green Votes', 'Socialism and Liberation Votes', 'Socialist Worker Votes', 'Constitution Votes', 'Justice Votes', 'Independent Votes', 'Write-In Votes']
+            ],
+            labels: {
+              format: {
+                'Democratic Votes': function(d) {return d},
+                'Republican Votes': function(d) {return d},
+                'Libertarian Votes': function(d) {return d}
+              }
+            },
+            order:null,
+          },
+          axis: {
+            x: {
+              type: 'category',
+              categories: ['2020', '2016', '2012', '2008']
+            },
+            y: {
+              tick: {
+                format: function(d) {return d/1000000 + 'm'}
+              }
+            },
+            rotated: true
+          },
+          padding: {
+            right: 20
+          },
+          bindto: "#county-chart-history"
         });
       }
 
@@ -202,6 +299,9 @@
     });
 
     bchart = c3.generate({
+      size: {
+        height: 700
+      },
       data: {
         columns: [
           ['Democratic Votes', 2369612,1742718,1755396,1750848],
@@ -212,16 +312,36 @@
           ['Socialist Worker Votes', 2487,4307,1205,641],
           ['Constitution Votes', 0, 17623,8851,9432],
           ['Justice Votes', 0, 0, 4946,0],
-          ['Independent Votes', 0, 0, 0, 29489]
+          ['Independent Votes', 0, 0, 0, 29489],
           ['Write-In Votes', 27252,0,0,0]
         ],
         type: 'bar',
         groups: [
-          ['Green Votes', 'Socialism and Liberation Votes', 'Socialist Worker Votes', 'Constitution votes', 'Justice Votes', 'Independent Votes', 'Write-In Votes']
-        ]
+          ['Green Votes', 'Socialism and Liberation Votes', 'Socialist Worker Votes', 'Constitution Votes', 'Justice Votes', 'Independent Votes', 'Write-In Votes']
+        ],
+        labels: {
+          format: {
+            'Democratic Votes': function(d) {return d},
+            'Republican Votes': function(d) {return d},
+            'Libertarian Votes': function(d) {return d}
+          }
+        },
+        order:null,
       },
       axis: {
+        x: {
+          type: 'category',
+          categories: ['2020', '2016', '2012', '2008']
+        },
+        y: {
+          tick: {
+            format: function(d) {return d/1000000 + 'm'}
+          }
+        },
         rotated: true
+      },
+      padding: {
+        right: 20
       },
       bindto: "#county-chart-history"
     });

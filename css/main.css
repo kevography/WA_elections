@@ -62,11 +62,11 @@ html, body, #map {
 }
 
 #placename {
-  font-size: 40px;
+  font-size: 50px;
   font-family: 'Oswald', sans-serif;
 }
 #totalvotes {
-  font-size: 30px;
+  font-size: 40px;
   font-family: 'Oswald', sans-serif;
 }
 /* card decks */
@@ -79,7 +79,7 @@ html, body, #map {
 
 .county-count {
   margin:0;
-  text-align: left;
+  text-align: center;
 
   font-size: 50px;
 }
