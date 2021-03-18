@@ -4,10 +4,7 @@ html, body, #map {
   margin: 0;
   font-family: 'Titillium Web', serif;
 }
-#directions {
-  float: right;
-  padding:0px 0px 0px 0px;
-}
+
 #info {
   z-index: 1000;
   position: fixed;
