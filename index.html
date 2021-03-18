@@ -16,6 +16,7 @@
   <script src="js/c3.min.js"></script>
   <script src="js/leaflet.js"></script>
   <script src="js/jquery.min.js"></script>
+
 </head>
 
 <body>
@@ -23,9 +24,22 @@
   <div id="info">
 
     <div id="title">
-      WA State Presidential Votes by Party
+      Washington State 2020 Presidential Election
+    </div>
+
+
+    <div id="socialmediaicons">
       <span><a href="https://twitter.com/UW" target="_blank"><i class="fa fa-twitter-square"></i></a></span>
       <span><a href="https://github.com/kevography/WA_elections" target="_blank"><i class="fa fa-github-square"></i></a></span>
+    </div>
+    <div class="legend dem">Democratic Nominee Winner</div>
+    <div class="legend rep">Republican Nominee Winner</div>
+    <button class="accordion">About</button>
+    <div class="panel">
+      <p class="about">How blue is Washington state? Living in Washington state myself, I've known it to be solidly Democratic in terms
+      of the presidential election for each major election in my lifetime. At the same time I've alson known of the strong divide that exists between
+      Western Washington and Eastern Washington regarding their political affiliations. This map is an interactive attempt to understand exactly how Washingtonians
+      vote as well as some of the historical trends that are reflected in their voting histories. </p>
     </div>
 
     <p id="placename">Washington</p>
@@ -33,19 +47,42 @@
       <span> Total Votes (2020): </span><span id="total-votes">4087631</span>
     </div>
 
+
+
     <h5 class="desc"> 2020 Presidential Vote Breakdown </h5>
     <div id="county-chart-proportional"></div>
+    <p class="about">Overall Washington State can look solidly blue, but clicking on individual counties it is easy to see that the further
+    east one goes, the further Republican it leans. A standout in Eastern Washington is Whitman county, home to Washington State University.
+    Meanwhile counties in/around the Puget Sound core lean heavily Democratic with the most populous county in votes King County overpowering the
+    less populated counties further east. </p>
     <h5 class="desc"> Presidential Vote History </h5>
     <div id="county-chart-history"></div>
+    <p class="about">Key to the Democratic win year to year is King County with its over 600,000 vote margin over the Republican party nominee. Where 2016 was
+     a downturn year for both Democrats and Republicans alike, that story does not track across all counties. Where the Democrats consistently lost voters in 2016, the Republican
+    turnout is far less so with some counties such as Whitman, Benton, and Garfield losing Republican voters, counties like Grays Harbor, Ferry, and Pacific county finding untapped
+    reservoirs of energized voters. Another interesting narrative is how the third party votes (see below) have trended across time. With the 2020 presidential election mobilizing voters
+    from all over, we saw record-shattering turnouts surpassing the previous three elections. At the same time 2020 appears to have reversed previous years' trends of a rapidly growing third party base
+    as members found it less viable to vote as such. </p>
 <!--
     <div id="count" class="card">
       <h5 class="desc"> 2020 Presidential Votes: Democratic Nominee</h5>
       <p class="county-count" id="demvote2020">2369612</p>
       <h5 class="desc"> 2020 Presidential Votes: Republican Nominee</h5>
       <p class="county-count" id="repvote2020">1584651</p>
+      <h5 class="desc"> 2020 Presidential Votes: Libertarian Nominee</h5>
+      <p class="county-count" id="libvote2020">80500</p>
+      <h5 class="desc"> 2020 Presidential Votes: Green Nominee</h5>
+      <p class="county-count" id="grnvote2020">18289</p>
+      <h5 class="desc"> 2020 Presidential Votes: Socialism and Liberation Nominee</h5>
+      <p class="county-count" id="slpvote2020">4840</p>
+      <h5 class="desc"> 2020 Presidential Votes: Socialist Workers Nominee</h5>
+      <p class="county-count" id="swpvote2020">2487</p>
+      <h5 class="desc"> 2020 Presidential Votes: Write-In</h5>
+      <p class="county-count" id="wrivote2020">27252</p>
     </div>
 -->
-
+    <h5 class="desc"> The Third Party Vote </h5>
+    <div id="thirdparty"></div>
 
     <!-- <div id="footer">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
@@ -78,12 +115,15 @@
 
 
     // 3. Add a base map.
-    L.tileLayer('assets/positron/{z}/{x}/{y}.png').addTo(mymap);
+    L.tileLayer('assets/positron/{z}/{x}/{y}.png', {
+      attribution: 'Basemap &copy; CartoDB | Data &copy; WA-SoS, US Census Bureau | Created using Leaflet, C3, and D3 JS Libraries | Created by Kevin Chau'
+    }).addTo(mymap);
 
     // 4. Declare three global variables for the wa counties thematic layer, bar chart, and the organized wa data.
     var countiesLayer = null,
       bchart = null,
       pchart = null,
+      tpchart = null,
       counties = {};
 
     // 5. load all datasets through promise mechnism and store them in an array
@@ -93,6 +133,7 @@
 
       // 6.1 create a couties layer
       countiesLayer = L.geoJSON(datasets[0], {
+        style: style,
         onEachFeature: onEachFeature
       }).addTo(mymap);
 
@@ -105,16 +146,35 @@
         });
       }
 
+      function style(feature){
+        return {
+          fillColor: setColor(feature.properties.prz2020wnr),
+          weight: 2,
+          opacity: 1,
+          color: 'white',
+          dashArray: '4',
+          fillOpacity: 0.7
+        }
+      }
+      function setColor(party){
+        var color ='';
+        if(party=='R') {color='#D60D2C'}
+        else if (true) {color='#238AD0'}
+        else {color='#ffffff'}
+        return color;
+      }
       // 6.3 this function works when the mouse hovers over on a map feature.
       function highlightFeature(e) {
         // e indicates the current event
         var feature = e.target; //the target capture the object which the event associates with
         feature.setStyle({
+          /*
           weight: 2,
           opacity: 0.8,
           color: '#e3e3e3',
           fillColor: '#000000',
-          fillOpacity: 0.1
+          */
+          fillOpacity: 0.35
         });
       }
 
@@ -126,6 +186,11 @@
         $("#placename").text(e.target.feature.properties.COUNTY_LAB + " County");
         $("#demvote2020").text(e.target.feature.properties.prz2020dem);
         $("#repvote2020").text(e.target.feature.properties.prz2020rep);
+        $("#libvote2020").text(e.target.feature.properties.prz2020lib);
+        $("#grnvote2020").text(e.target.feature.properties.prz2020grn);
+        $("#slpvote2020").text(e.target.feature.properties.prz2020slp);
+        $("#swpvote2020").text(e.target.feature.properties.prz2020swp);
+        $("#wrivote2020").text(e.target.feature.properties.prz2020wri);
         $("#total-votes").text(e.target.feature.properties.prz2020dem+e.target.feature.properties.prz2020rep+e.target.feature.properties.prz2020lib+e.target.feature.properties.prz2020grn+e.target.feature.properties.prz2020slp+e.target.feature.properties.prz2020swp+e.target.feature.properties.prz2020wri);
         pchart = c3.generate({
         data: {
@@ -140,6 +205,20 @@
                 ['Write-In Votes', e.target.feature.properties.prz2020wri]
             ],
             type : 'pie',
+            order: null,
+            colors: {
+                'Democratic Votes': '#238AD0',
+                'Republican Votes': '#D60D2C',
+                'Libertarian Votes': '#F5DD00',
+                'Green Votes': '#17AA5C',
+                'Socialism and Liberation Votes': '#B16B75',
+                'Socialist Worker Votes': '#F97D00',
+                'Write-In Votes': '#ffffff',
+            },
+            color: function (color, d) {
+                // d will be 'id' when called for legends
+                return d.id && d.id === 'data3' ? d3.rgb(color).darker(d.value / 150) : color;
+            },
             onclick: function (d, i) { console.log("onclick", d, i); },
             onmouseover: function (d, i) { console.log("onmouseover", d, i); },
             onmouseout: function (d, i) { console.log("onmouseout", d, i); }
@@ -148,6 +227,9 @@
         });
 
         bchart = c3.generate({
+          size: {
+            height: 700
+          },
           data: {
             columns: [
               ['Democratic Votes', e.target.feature.properties.prz2020dem,e.target.feature.properties.prz2016dem,e.target.feature.properties.prz2012dem,e.target.feature.properties.prz2008dem],
@@ -165,6 +247,22 @@
             groups:[
               ['Green Votes', 'Socialism and Liberation Votes', 'Socialist Worker Votes', 'Constitution Votes', 'Justice Votes', 'Independent Votes', 'Write-In Votes']
             ],
+            colors: {
+                'Democratic Votes': '#238AD0',
+                'Republican Votes': '#D60D2C',
+                'Libertarian Votes': '#F5DD00',
+                'Green Votes': '#17AA5C',
+                'Socialism and Liberation Votes': '#B16B75',
+                'Socialist Worker Votes': '#F97D00',
+                'Write-In Votes': '#ffffff',
+                'Constitution Votes': '#E1CDB4',
+                'Justice Votes': '#3495B6',
+                                'Independent Votes': '#B17EC9'
+            },
+            color: function (color, d) {
+                // d will be 'id' when called for legends
+                return d.id && d.id === 'data3' ? d3.rgb(color).darker(d.value / 150) : color;
+            },
             labels: {
                 format: {
                   'Democratic Votes': function(d) {return d},
@@ -191,6 +289,56 @@
           },
           bindto: "#county-chart-history"
         });
+
+        tpchart =c3.generate({
+          data: {
+            columns: [
+              ['Libertarian Votes', e.target.feature.properties.prz2020lib,e.target.feature.properties.prz2016lib,e.target.feature.properties.prz2012lib,e.target.feature.properties.prz2008lib],
+              ['Green Votes', e.target.feature.properties.prz2020grn,e.target.feature.properties.prz2016grn,e.target.feature.properties.prz2012grn,e.target.feature.properties.prz2008grn],
+              ['Socialism and Liberation Votes', e.target.feature.properties.prz2020slp,e.target.feature.properties.prz2016slp,e.target.feature.properties.prz2012slp,e.target.feature.properties.prz2008slp],
+              ['Socialist Worker Votes', e.target.feature.properties.prz2020swp,e.target.feature.properties.prz2016swp,e.target.feature.properties.prz2012swp,e.target.feature.properties.prz2008swp],
+              ['Constitution Votes', 0, e.target.feature.properties.prz2016con,e.target.feature.properties.prz2012con,e.target.feature.properties.prz2008con],
+              ['Justice Votes', 0, 0, e.target.feature.properties.prz2012jst,0],
+              ['Independent Votes', 0, 0, 0, e.target.feature.properties.prz2008ind],
+              ['Write-In Votes', e.target.feature.properties.prz2020wri,0,0,0],
+            ],
+            type: 'bar',
+            groups: [
+              ['Libertarian Votes', 'Green Votes', 'Socialism and Liberation Votes', 'Socialist Worker Votes', 'Constitution Votes', 'Justice Votes', 'Independent Votes', 'Write-In Votes']
+            ],
+            colors: {
+                'Democratic Votes': '#238AD0',
+                'Republican Votes': '#D60D2C',
+                'Libertarian Votes': '#F5DD00',
+                'Green Votes': '#17AA5C',
+                'Socialism and Liberation Votes': '#B16B75',
+                'Socialist Worker Votes': '#F97D00',
+                'Write-In Votes': '#ffffff',
+                'Constitution Votes': '#E1CDB4',
+                'Justice Votes': '#3495B6',
+                                'Independent Votes': '#B17EC9'
+            },
+            color: function (color, d) {
+                // d will be 'id' when called for legends
+                return d.id && d.id === 'data3' ? d3.rgb(color).darker(d.value / 150) : color;
+            },
+
+            order:null,
+          },
+          axis: {
+            x: {
+              type: 'category',
+              categories: ['2020', '2016', '2012', '2008']
+            },
+            y: {
+              tick: {
+                format: function(d) {return d/1000 + 'k'}
+              }
+            }
+          },
+
+          bindto: "#thirdparty"
+        });
       }
 
       // 6.5 reset the hightlighted feature when the mouse is out of its region.
@@ -206,6 +354,11 @@
         $("#placename").text("Washington");
         $("#demvote2020").text("2369612");
         $("#repvote2020").text("1584651");
+        $("#libvote2020").text("80500");
+        $("#grnvote2020").text("18289");
+        $("#slpvote2020").text("4840");
+        $("#swpvote2020").text("2487");
+        $("#wrivote2020").text("27252");
         $("#total-votes").text("4087631");
 
         pchart = c3.generate({
@@ -220,7 +373,25 @@
                 ['Socialist Worker Votes', 2487],
                 ['Write-In Votes', 27252],
             ],
+            colors: {
+                'Democratic Votes': '#238AD0',
+                'Republican Votes': '#D60D2C',
+                'Libertarian Votes': '#F5DD00',
+                'Green Votes': '#17AA5C',
+                'Socialism and Liberation Votes': '#B16B75',
+                'Socialist Worker Votes': '#F97D00',
+                'Write-In Votes': '#ffffff',
+                'Constitution Votes': '#E1CDB4',
+                'Justice Votes': '#3495B6',
+                                'Independent Votes': '#B17EC9'
+            },
+            color: function (color, d) {
+                // d will be 'id' when called for legends
+                return d.id && d.id === 'data3' ? d3.rgb(color).darker(d.value / 150) : color;
+            },
+
             type : 'pie',
+            order: null,
             onclick: function (d, i) { console.log("onclick", d, i); },
             onmouseover: function (d, i) { console.log("onmouseover", d, i); },
             onmouseout: function (d, i) { console.log("onmouseout", d, i); }
@@ -230,6 +401,9 @@
 
         //Bar chart of voting history
         bchart = c3.generate({
+          size: {
+            height: 700
+          },
           data: {
             columns: [
               ['Democratic Votes', 2369612,1742718,1755396,1750848],
@@ -254,6 +428,23 @@
                 'Libertarian Votes': function(d) {return d}
               }
             },
+            colors: {
+                'Democratic Votes': '#238AD0',
+                'Republican Votes': '#D60D2C',
+                'Libertarian Votes': '#F5DD00',
+                'Green Votes': '#17AA5C',
+                'Socialism and Liberation Votes': '#B16B75',
+                'Socialist Worker Votes': '#F97D00',
+                'Write-In Votes': '#ffffff',
+                'Constitution Votes': '#E1CDB4',
+                'Justice Votes': '#3495B6',
+                'Independent Votes': '#B17EC9'
+            },
+            color: function (color, d) {
+                // d will be 'id' when called for legends
+                return d.id && d.id === 'data3' ? d3.rgb(color).darker(d.value / 150) : color;
+            },
+
             order:null,
           },
           axis: {
@@ -274,7 +465,54 @@
           bindto: "#county-chart-history"
         });
       }
+      tpchart =c3.generate({
+        data: {
+          columns: [
+            ['Libertarian Votes',80500,160879,42202,12728],
+            ['Green Votes', 18289,58417,20928,3819],
+            ['Socialism and Liberation Votes', 4840,3523,1318,705],
+            ['Socialist Worker Votes', 2487,4307,1205,641],
+            ['Constitution Votes', 0, 17623,8851,9432],
+            ['Justice Votes', 0, 0, 4946,0],
+            ['Independent Votes', 0, 0, 0, 29489],
+            ['Write-In Votes', 27252,0,0,0]
+          ],
+          type: 'bar',
+          groups: [
+            ['Libertarian Votes', 'Green Votes', 'Socialism and Liberation Votes', 'Socialist Worker Votes', 'Constitution Votes', 'Justice Votes', 'Independent Votes', 'Write-In Votes']
+          ],
+          colors: {
+              'Democratic Votes': '#238AD0',
+              'Republican Votes': '#D60D2C',
+              'Libertarian Votes': '#F5DD00',
+              'Green Votes': '#17AA5C',
+              'Socialism and Liberation Votes': '#B16B75',
+              'Socialist Worker Votes': '#F97D00',
+              'Write-In Votes': '#ffffff',
+              'Constitution Votes': '#E1CDB4',
+              'Justice Votes': '#3495B6',
+                              'Independent Votes': '#B17EC9'
+          },
+          color: function (color, d) {
+              // d will be 'id' when called for legends
+              return d.id && d.id === 'data3' ? d3.rgb(color).darker(d.value / 150) : color;
+          },
 
+          order:null,
+        },
+        axis: {
+          x: {
+            type: 'category',
+            categories: ['2020', '2016', '2012', '2008']
+          },
+          y: {
+            tick: {
+              format: function(d) {return d/1000 + 'k'}
+            }
+          }
+        },
+        bindto: "#thirdparty"
+      });
 
     });
 
@@ -290,7 +528,25 @@
             ['Socialist Worker Votes', 2487],
             ['Write-In Votes', 27252]
         ],
-        type : 'pie',
+        colors: {
+            'Democratic Votes': '#238AD0',
+            'Republican Votes': '#D60D2C',
+            'Libertarian Votes': '#F5DD00',
+            'Green Votes': '#17AA5C',
+            'Socialism and Liberation Votes': '#B16B75',
+            'Socialist Worker Votes': '#F97D00',
+            'Write-In Votes': '#ffffff',
+            'Constitution Votes': '#E1CDB4',
+            'Justice Votes': '#3495B6',
+            'Independent Votes': '#B17EC9'
+        },
+        color: function (color, d) {
+            // d will be 'id' when called for legends
+            return d.id && d.id === 'data3' ? d3.rgb(color).darker(d.value / 150) : color;
+        },
+
+        type: 'pie',
+        order: null,
         onclick: function (d, i) { console.log("onclick", d, i); },
         onmouseover: function (d, i) { console.log("onmouseover", d, i); },
         onmouseout: function (d, i) { console.log("onmouseout", d, i); }
@@ -326,6 +582,23 @@
             'Libertarian Votes': function(d) {return d}
           }
         },
+        colors: {
+            'Democratic Votes': '#238AD0',
+            'Republican Votes': '#D60D2C',
+            'Libertarian Votes': '#F5DD00',
+            'Green Votes': '#17AA5C',
+            'Socialism and Liberation Votes': '#B16B75',
+            'Socialist Worker Votes': '#F97D00',
+            'Write-In Votes': '#ffffff',
+            'Constitution Votes': '#E1CDB4',
+            'Justice Votes': '#3495B6',
+            'Independent Votes': '#B17EC9'
+        },
+        color: function (color, d) {
+            // d will be 'id' when called for legends
+            return d.id && d.id === 'data3' ? d3.rgb(color).darker(d.value / 150) : color;
+        },
+
         order:null,
       },
       axis: {
@@ -345,6 +618,75 @@
       },
       bindto: "#county-chart-history"
     });
+
+    //third party chart
+    tpchart =c3.generate({
+      data: {
+        columns: [
+          ['Libertarian Votes',80500,160879,42202,12728],
+          ['Green Votes', 18289,58417,20928,3819],
+          ['Socialism and Liberation Votes', 4840,3523,1318,705],
+          ['Socialist Worker Votes', 2487,4307,1205,641],
+          ['Constitution Votes', 0, 17623,8851,9432],
+          ['Justice Votes', 0, 0, 4946,0],
+          ['Independent Votes', 0, 0, 0, 29489],
+          ['Write-In Votes', 27252,0,0,0]
+        ],
+        type: 'bar',
+        groups: [
+          ['Libertarian Votes', 'Green Votes', 'Socialism and Liberation Votes', 'Socialist Worker Votes', 'Constitution Votes', 'Justice Votes', 'Independent Votes', 'Write-In Votes']
+        ],
+        colors: {
+            'Democratic Votes': '#238AD0',
+            'Republican Votes': '#D60D2C',
+            'Libertarian Votes': '#F5DD00',
+            'Green Votes': '#17AA5C',
+            'Socialism and Liberation Votes': '#B16B75',
+            'Socialist Worker Votes': '#F97D00',
+            'Write-In Votes': '#ffffff',
+            'Constitution Votes': '#E1CDB4',
+            'Justice Votes': '#3495B6',
+                            'Independent Votes': '#B17EC9'
+        },
+        color: function (color, d) {
+            // d will be 'id' when called for legends
+            return d.id && d.id === 'data3' ? d3.rgb(color).darker(d.value / 150) : color;
+        },
+
+        order:null,
+      },
+      axis: {
+        x: {
+          type: 'category',
+          categories: ['2020', '2016', '2012', '2008']
+        },
+        y: {
+          tick: {
+            format: function(d) {return d/1000 + 'k'}
+          }
+        }
+      },
+      bindto: "#thirdparty"
+    });
+
+    var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    /* Toggle between adding and removing the "active" class,
+    to highlight the button that controls the panel */
+    this.classList.toggle("active");
+
+    /* Toggle between hiding and showing the active panel */
+    var panel = this.nextElementSibling;
+    if (panel.style.display === "block") {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+    }
+  });
+}
     </script>
 </body>
 
