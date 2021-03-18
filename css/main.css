@@ -12,7 +12,7 @@ html, body, #map {
   top: 1%;
   bottom: 1%;
   left: .5%;
-  padding: 10px 15px 0px 15px;
+  padding: 5px 10px 20px 10px;
   background: #343a40;
   color: white;
   overflow:auto;
